@@ -95,7 +95,10 @@ app.get('/', async (req, res) => {
       `;
     }).join('')}
   </div>
-  
+  <div style="display: flex; gap: 8px; margin-bottom: 1rem;">
+    <button id="btn-hour" onclick="setView('hour')" style="padding: 6px 14px; border: 1px solid #378ADD; background: #378ADD; color: white; border-radius: 6px; cursor: pointer; font-size: 13px;">Hour</button>
+    <button id="btn-day" onclick="setView('day')" style="padding: 6px 14px; border: 1px solid #ccc; background: white; color: #333; border-radius: 6px; cursor: pointer; font-size: 13px;">Day</button>
+  </div>
   <div class="legend">
     <span><span class="dot" style="background:#378ADD"></span>PM2.5</span>
     <span><span class="dot" style="background:#0F6E56"></span>Ozone (O3)</span>
