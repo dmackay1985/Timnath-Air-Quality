@@ -115,31 +115,79 @@ app.get('/', async (req, res) => {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-  const labels = ${JSON.stringify(labels)};
-  const pm25 = ${JSON.stringify(byParam['PM2.5'].map(r => r.aqi))};
-  const o3 = ${JSON.stringify(byParam['O3'].map(r => r.aqi))};
-  const pm10 = ${JSON.stringify(byParam['PM10'].map(r => r.aqi))};
+  const rawData = {
+    'PM2.5': ${JSON.stringify(byParam['PM2.5'].map(r => ({ t: r.observation_time, v: r.aqi })))},
+    'O3': ${JSON.stringify(byParam['O3'].map(r => ({ t: r.observation_time, v: r.aqi })))},
+    'PM10': ${JSON.stringify(byParam['PM10'].map(r => ({ t: r.observation_time, v: r.aqi })))}
+  };
   
-  new Chart(document.getElementById('chart'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { label: 'PM2.5', data: pm25, borderColor: '#378ADD', backgroundColor: 'transparent', borderWidth: 2, tension: 0.3, pointRadius: 3 },
-        { label: 'Ozone', data: o3, borderColor: '#0F6E56', backgroundColor: 'transparent', borderWidth: 2, tension: 0.3, pointRadius: 3 },
-        { label: 'PM10', data: pm10, borderColor: '#BA7517', backgroundColor: 'transparent', borderWidth: 2, tension: 0.3, pointRadius: 3 }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: true, suggestedMax: 60, grid: { color: '#eee' } },
-        x: { grid: { display: false } }
-      }
+  let chart;
+  
+  function bucketByDay(rows) {
+    const buckets = {};
+    for (const row of rows) {
+      const d = new Date(row.t);
+      const key = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      if (!buckets[key]) buckets[key] = [];
+      buckets[key].push(row.v);
     }
-  });
+    return Object.entries(buckets).map(([label, values]) => ({
+      label,
+      avg: Math.round(values.reduce((a, b) => a + b, 0) / values.length)
+    }));
+  }
+  
+  function bucketByHour(rows) {
+    return rows.map(row => ({
+      label: new Date(row.t).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
+      avg: row.v
+    }));
+  }
+  
+  function render(view) {
+    const bucket = view === 'day' ? bucketByDay : bucketByHour;
+    const pm25 = bucket(rawData['PM2.5']);
+    const o3 = bucket(rawData['O3']);
+    const pm10 = bucket(rawData['PM10']);
+    
+    if (chart) chart.destroy();
+    
+    chart = new Chart(document.getElementById('chart'), {
+      type: 'line',
+      data: {
+        labels: pm25.map(d => d.label),
+        datasets: [
+          { label: 'PM2.5', data: pm25.map(d => d.avg), borderColor: '#378ADD', backgroundColor: 'transparent', borderWidth: 2, tension: 0.3, pointRadius: 3 },
+          { label: 'Ozone', data: o3.map(d => d.avg), borderColor: '#0F6E56', backgroundColor: 'transparent', borderWidth: 2, tension: 0.3, pointRadius: 3 },
+          { label: 'PM10', data: pm10.map(d => d.avg), borderColor: '#BA7517', backgroundColor: 'transparent', borderWidth: 2, tension: 0.3, pointRadius: 3 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, suggestedMax: 60, grid: { color: '#eee' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+  
+  function setView(view) {
+    const hourBtn = document.getElementById('btn-hour');
+    const dayBtn = document.getElementById('btn-day');
+    if (view === 'hour') {
+      hourBtn.style.background = '#378ADD'; hourBtn.style.color = 'white'; hourBtn.style.borderColor = '#378ADD';
+      dayBtn.style.background = 'white'; dayBtn.style.color = '#333'; dayBtn.style.borderColor = '#ccc';
+    } else {
+      dayBtn.style.background = '#378ADD'; dayBtn.style.color = 'white'; dayBtn.style.borderColor = '#378ADD';
+      hourBtn.style.background = 'white'; hourBtn.style.color = '#333'; hourBtn.style.borderColor = '#ccc';
+    }
+    render(view);
+  }
+  
+  render('hour');
 </script>
 </body>
 </html>`;
