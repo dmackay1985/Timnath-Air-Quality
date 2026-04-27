@@ -178,11 +178,19 @@ app.get('/', async (req, res) => {
     const hourBtn = document.getElementById('btn-hour');
     const dayBtn = document.getElementById('btn-day');
     if (view === 'hour') {
-      hourBtn.style.background = '#378ADD'; hourBtn.style.color = 'white'; hourBtn.style.borderColor = '#378ADD';
-      dayBtn.style.background = 'white'; dayBtn.style.color = '#333'; dayBtn.style.borderColor = '#ccc';
+      hourBtn.style.background = '#378ADD';
+      hourBtn.style.color = 'white';
+      hourBtn.style.borderColor = '#378ADD';
+      dayBtn.style.background = 'white';
+      dayBtn.style.color = '#333';
+      dayBtn.style.borderColor = '#ccc';
     } else {
-      dayBtn.style.background = '#378ADD'; dayBtn.style.color = 'white'; dayBtn.style.borderColor = '#378ADD';
-      hourBtn.style.background = 'white'; hourBtn.style.color = '#333'; hourBtn.style.borderColor = '#ccc';
+      dayBtn.style.background = '#378ADD';
+      dayBtn.style.color = 'white';
+      dayBtn.style.borderColor = '#378ADD';
+      hourBtn.style.background = 'white';
+      hourBtn.style.color = '#333';
+      hourBtn.style.borderColor = '#ccc';
     }
     render(view);
   }
