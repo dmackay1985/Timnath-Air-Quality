@@ -254,13 +254,6 @@ app.get('/', async (req, res) => {
       <canvas id="flow-chart"></canvas>
     </div>
     
-    <h2>Horsetooth reservoir elevation</h2>
-    <div class="legend">
-      <span><span class="dot" style="background:#BA7517"></span>Elevation (ft)</span>
-    </div>
-    <div class="chart-wrap">
-      <canvas id="reservoir-chart"></canvas>
-    </div>
   </div>
   
   <!-- COMBINED TAB -->
