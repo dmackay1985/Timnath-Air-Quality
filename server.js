@@ -232,10 +232,10 @@ app.get('/', async (req, res) => {
         <p class="value">${poudreTim ? Math.round(poudreTim.value) : '—'} <span class="unit">cfs</span></p>
         <p class="cat info">River flow</p>
       </div>
-      <div class="card">
+     <div class="card" style="background: #f5f3ec; border-style: dashed;">
         <p class="label">Horsetooth</p>
-        <p class="value">${horsetoothEl ? Math.round(horsetoothEl.value * 10) / 10 : '—'} <span class="unit">ft</span></p>
-        <p class="cat info">Reservoir elevation</p>
+        <p class="value" style="font-size: 18px; color: #666; font-weight: 400; margin-top: 8px;">Coming soon</p>
+        <p class="cat" style="color: #888;">USBR integration</p>
       </div>
     </div>
     
