@@ -17,7 +17,7 @@ async function getData() {
       SELECT observation_time, parameter, aqi, category, reporting_area
       FROM air_quality
       ORDER BY observation_time DESC
-      LIMIT 500
+      LIMIT 5000
     `);
     return res.rows;
   } finally {
@@ -34,9 +34,9 @@ app.get('/', async (req, res) => {
       if (!latest[row.parameter]) latest[row.parameter] = row;
     }
     
-    const byParam = { 'PM2.5': [], 'O3': [], 'PM10': [] };
+   const byParam = { 'PM2.5': [], 'O3': [], 'PM10': [] };
     for (const row of rows) {
-      if (byParam[row.parameter] && byParam[row.parameter].length < 48) {
+      if (byParam[row.parameter]) {
         byParam[row.parameter].push(row);
       }
     }
@@ -95,9 +95,10 @@ app.get('/', async (req, res) => {
       `;
     }).join('')}
   </div>
-  <div style="display: flex; gap: 8px; margin-bottom: 1rem;">
-    <button id="btn-hour" onclick="setView('hour')" style="padding: 6px 14px; border: 1px solid #378ADD; background: #378ADD; color: white; border-radius: 6px; cursor: pointer; font-size: 13px;">Hour</button>
-    <button id="btn-day" onclick="setView('day')" style="padding: 6px 14px; border: 1px solid #ccc; background: white; color: #333; border-radius: 6px; cursor: pointer; font-size: 13px;">Day</button>
+<div style="display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap;">
+    <button id="btn-hour" onclick="setView('hour')" style="padding: 6px 14px; border: 1px solid #378ADD; background: #378ADD; color: white; border-radius: 6px; cursor: pointer; font-size: 13px;">24 hours</button>
+    <button id="btn-week" onclick="setView('week')" style="padding: 6px 14px; border: 1px solid #ccc; background: white; color: #333; border-radius: 6px; cursor: pointer; font-size: 13px;">7 days</button>
+    <button id="btn-day" onclick="setView('day')" style="padding: 6px 14px; border: 1px solid #ccc; background: white; color: #333; border-radius: 6px; cursor: pointer; font-size: 13px;">All days</button>
   </div>
   <div class="legend">
     <span><span class="dot" style="background:#378ADD"></span>PM2.5</span>
@@ -145,7 +146,14 @@ app.get('/', async (req, res) => {
   }
   
   function render(view) {
-    const bucket = view === 'day' ? bucketByDay : bucketByHour;
+    let bucket;
+    if (view === 'day') {
+      bucket = bucketByDay;
+    } else if (view === 'week') {
+      bucket = (rows) => bucketByDay(rows).slice(-7);
+    } else {
+      bucket = (rows) => bucketByHour(rows).slice(-24);
+    }
     const pm25 = bucket(rawData['PM2.5']);
     const o3 = bucket(rawData['O3']);
     const pm10 = bucket(rawData['PM10']);
@@ -175,22 +183,22 @@ app.get('/', async (req, res) => {
   }
   
   function setView(view) {
-    const hourBtn = document.getElementById('btn-hour');
-    const dayBtn = document.getElementById('btn-day');
-    if (view === 'hour') {
-      hourBtn.style.background = '#378ADD';
-      hourBtn.style.color = 'white';
-      hourBtn.style.borderColor = '#378ADD';
-      dayBtn.style.background = 'white';
-      dayBtn.style.color = '#333';
-      dayBtn.style.borderColor = '#ccc';
-    } else {
-      dayBtn.style.background = '#378ADD';
-      dayBtn.style.color = 'white';
-      dayBtn.style.borderColor = '#378ADD';
-      hourBtn.style.background = 'white';
-      hourBtn.style.color = '#333';
-      hourBtn.style.borderColor = '#ccc';
+    const buttons = {
+      hour: document.getElementById('btn-hour'),
+      week: document.getElementById('btn-week'),
+      day: document.getElementById('btn-day')
+    };
+    for (const key in buttons) {
+      const btn = buttons[key];
+      if (key === view) {
+        btn.style.background = '#378ADD';
+        btn.style.color = 'white';
+        btn.style.borderColor = '#378ADD';
+      } else {
+        btn.style.background = 'white';
+        btn.style.color = '#333';
+        btn.style.borderColor = '#ccc';
+      }
     }
     render(view);
   }
